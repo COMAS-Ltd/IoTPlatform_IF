@@ -1,0 +1,559 @@
+---
+swagger: "2.0"
+info:
+  description: The API for comas IOT project
+  version: 1.0.0
+  title: IoT Gateway Platform
+host: virtserver.swaggerhub.com
+basePath: /iot-platform-dev/IoT_Gateway_Platform/1.0.0
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  /auth:
+    post:
+      tags:
+      - Auth
+      summary: ログイン
+      description: ログインする
+      parameters:
+      - in: body
+        name: authUser
+        required: true
+        schema:
+          $ref: '#/definitions/authUser'
+      responses:
+        "201":
+          description: Create
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errorMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorMessage'
+    delete:
+      tags:
+      - Auth
+      summary: ログアウト
+      description: ログアウトする
+      parameters:
+      - in: body
+        name: authApi
+        required: true
+        schema:
+          $ref: '#/definitions/authApi'
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorMessage'
+  /sensor/up:
+    post:
+      tags:
+      - Sensor-Uplink
+      summary: センサー値登録
+      description: センサーの値を登録する
+      parameters:
+      - in: body
+        name: uplinkSensor
+        required: true
+        schema:
+          $ref: '#/definitions/uplinkSensor'
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorMessage'
+  /sensor/down:
+    post:
+      tags:
+      - Sensor-Downlink
+      summary: センサー値取得（現在値）
+      description: 現在のデバイスの情報を取得する
+      parameters:
+      - in: body
+        name: searchNow
+        required: true
+        schema:
+          $ref: '#/definitions/searchNow'
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/uplinkAccept'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errorMessage'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorMessage'
+  /sensor/history:
+    get:
+      tags:
+      - Sensor-Downlink
+      summary: センサー値取得（履歴）
+      description: 指定した期間のデバイスの情報を取得する
+      parameters:
+      - name: customerId
+        in: query
+        description: カスタマーID
+        required: true
+        type: string
+      - name: userId
+        in: query
+        description: ユーザID
+        required: true
+        type: string
+      - name: deviceId
+        in: query
+        description: デバイスID。deviceId もしくはgroupIdが必須。両方指定した場合はグループIDで検索を行う。
+        required: false
+        type: string
+      - name: groupId
+        in: query
+        description: グループID。deviceId もしくはgroupIdが必須。両方指定した場合はグループIDで検索を行う。
+        required: false
+        type: string
+      - name: sensorId
+        in: query
+        description: センサーID。0004（温度センサー）, 0005（湿度センサー）, 0007（照度センサー）, 0015（振動センサー）, 0033（電池残量センサー）,  Z001（ルーター搭載のバッテリー値）, Z002（ルーターがLTE基地局から受信している電波強度）, Z003（ルーターが受信しているBLEデバイスの電波強度） のいずれかを指定。
+        required: true
+        type: string
+      - name: startTime
+        in: query
+        description: 開始時間（YYYY-MM-DD HH:mm:ss）
+        required: true
+        type: string
+      - name: endTime
+        in: query
+        description: 終了時間（YYYY-MM-DD HH:mm:ss）
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Ok
+          schema:
+            $ref: '#/definitions/historyData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errorMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorMessage'
+  /sensor/now:
+    get:
+      tags:
+      - Sensor-Downlink
+      summary: センサー値表示（現在値）
+      description: 現在のデバイスの情報を表示する
+      parameters:
+      - name: customerId
+        in: query
+        description: カスタマーID
+        required: true
+        type: string
+      - name: userId
+        in: query
+        description: ユーザID
+        required: true
+        type: string
+      - name: deviceId
+        in: query
+        description: デバイスID。カンマ区切りで100件まで設定可能。
+        required: true
+        type: string
+      - name: sensorId
+        in: query
+        description: センサーID。0004（温度センサー）, 0005（湿度センサー）, 0007（照度センサー）, 0015（振動センサー）, 0033（電池残量センサー） のいずれかを指定。
+        required: true
+        type: string
+      - name: requestId
+        in: query
+        description: リクエストID
+        required: true
+        type: string
+      - name: cancelFlag
+        in: query
+        description: キャンセルフラグ（0:OFF/1:ON）。ONを指定した場合、以降のリクエスト状況確認を中止する。
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Ok
+          schema:
+            $ref: '#/definitions/nowData'
+        "206":
+          description: Partial Content
+          schema:
+            $ref: '#/definitions/nowData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errorMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorMessage'
+definitions:
+  authUser:
+    type: object
+    required:
+    - customerId
+    - userId
+    - userPassword
+    properties:
+      customerId:
+        type: string
+        example: foo@example.com
+        description: カスタマーID
+      userId:
+        type: string
+        example: userID
+        description: ユーザID
+      userPassword:
+        type: string
+        example: userPassword
+        description: ユーザパスワード
+    description: ユーザー認証情報
+  authApi:
+    type: object
+    required:
+    - customerId
+    - userId
+    properties:
+      customerId:
+        type: string
+        example: foo@example.com
+        description: カスタマーID
+      userId:
+        type: string
+        example: userID
+        description: ユーザID
+    description: API認証情報
+  errorMessage:
+    type: object
+    required:
+    - errors
+    properties:
+      errors:
+        type: array
+        items:
+          type: string
+          example: error
+    description: エラーメッセージ
+  uplinkSensor:
+    type: object
+    required:
+    - application
+    - date
+    - device
+    - group
+    - router
+    - uplinkId
+    properties:
+      group:
+        $ref: '#/definitions/group'
+      application:
+        $ref: '#/definitions/application'
+      router:
+        $ref: '#/definitions/router'
+      device:
+        $ref: '#/definitions/device'
+      uplinkId:
+        type: string
+        example: 57ea7d3e 92e3 4b5e 85b2 d4a361ba318e
+        description: センサーデータアップリンク処理の一意のID
+      date:
+        type: string
+        example: 2020 06 12T17:56:30+09:00
+        description: ルーターがセンサーデータを受信した日付(ISO 8601) 25桁
+    description: センサーデータアップリンク情報
+  group:
+    type: object
+    required:
+    - groupId
+    - name
+    properties:
+      groupId:
+        type: string
+        example: GRXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        description: アプリケーションが属しているグループID
+        maxLength: 34
+      name:
+        type: string
+        example: ""
+        description: グループの登録名
+    description: グループ情報
+  application:
+    type: object
+    required:
+    - applicationId
+    - name
+    properties:
+      applicationId:
+        type: string
+        example: APXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        description: 登録したアプリケーションのアプリケーションID
+        maxLength: 34
+      name:
+        type: string
+        example: DemoApp
+        description: アプリケーションの登録名(ユーザー定義にて設定された値)
+    description: アプリケーション情報
+  router:
+    type: object
+    required:
+    - battery
+    - fwVersion
+    - imsi
+    - routerId
+    - rssi
+    properties:
+      routerId:
+        type: string
+        example: 000001be
+        description: デバイスのセンサーデータを送信したルーターID
+      imsi:
+        type: string
+        example: XXXXXXXXXXXXXXX
+        description: ルーター内蔵SIMの加入者識別番号
+      rssi:
+        type: number
+        example: -51.0
+        description: ルーターがLTE基地局から受信している電波強度
+      battery:
+        type: number
+        example: 61.0
+        description: ルーター搭載のバッテリー値
+        minimum: 0
+        maximum: 100
+      fwVersion:
+        type: string
+        example: 1.0.0
+        description: ルーターのFirmware バージョン
+        maxLength: 11
+    description: ルーター情報
+  device:
+    type: object
+    required:
+    - data
+    - deviceId
+    - rssi
+    - sensorId
+    - sensorName
+    properties:
+      deviceId:
+        type: string
+        example: XXXXXXXXXXXXXXXX
+        description: センサーデータを送信したデバイスID
+      sensorId:
+        type: string
+        example: "0005"
+        description: センサーID
+      sensorName:
+        type: string
+        example: Humidity sensor
+        description: センサー名
+      rssi:
+        type: number
+        example: -26.0
+        description: ルーターが受信しているBLEデバイスの電波強度
+        minimum: -120
+        maximum: 0
+      data:
+        $ref: '#/definitions/deviceData'
+    description: デバイス情報
+  deviceData:
+    type: object
+  uplinkAccept:
+    type: object
+    required:
+    - deviceId
+    - requestId
+    - sensorId
+    properties:
+      deviceId:
+        type: string
+        example: 2468800108000001,2468800108000002
+        description: デバイスID。カンマ区切りで複数情報を設定可能。
+      sensorId:
+        type: string
+        example: "0005"
+        description: センサーID。0004（温度センサー）, 0005（湿度センサー）, 0007（照度センサー）, 0015（振動センサー）, 0033（電池残量センサー）のいずれかを指定。
+      requestId:
+        type: string
+        example: XXXXXXXXXXXXX
+        description: リクエストID
+    description: アップリンク要求受付情報
+  searchNow:
+    type: object
+    required:
+    - customerId
+    - params
+    - targets
+    - userId
+    properties:
+      customerId:
+        type: string
+        example: foo@example.com
+        description: カスタマーID
+      userId:
+        type: string
+        example: userID
+        description: ユーザID
+      targets:
+        $ref: '#/definitions/searchNowTarget'
+      params:
+        $ref: '#/definitions/searchNowParams'
+    description: 現在値検索情報
+  searchNowTarget:
+    type: object
+    properties:
+      devices:
+        type: array
+        example:
+        - "2468800108000001"
+        - "2468800108000002"
+        description: デバイスID。 複数指定可（最大100）。devices もしくはgroupsが必須。
+        items:
+          type: string
+      groups:
+        type: array
+        example:
+        - GR01234556789abcdefghijkABCDEFGHIJK
+        - GR00000000000XXXXXXXXXXXXXXXXXXXXXX
+        description: グループID。複数指定可（一回のアップリンクで指定するデバイスの数が合計100以下になるように設定すること）。devices もしくはgroupsが必須。
+        items:
+          type: string
+  searchNowParams:
+    type: object
+    required:
+    - sensorId
+    properties:
+      sensorId:
+        type: string
+        example: "0004"
+        description: 0004（温度センサー）, 0005（湿度センサー）, 0007（照度センサー）, 0015（振動センサー）, 0033（電池残量センサー）のいずれかを指定。
+  historyData:
+    type: object
+    required:
+    - deviceData
+    - groupId
+    - sensorId
+    properties:
+      groupId:
+        type: string
+        example: GR01234556789abcdefghijkABCDEFGHIJK
+        description: グループID
+      sensorId:
+        type: string
+        example: "0004"
+        description: 0004（温度センサー）, 0005（湿度センサー）, 0007（照度センサー）, 0015（振動センサー）, 0033（電池残量センサー）のいずれかを指定。
+      deviceData:
+        type: array
+        items:
+          $ref: '#/definitions/historyDeviceData'
+    description: 履歴要求応答データ
+  historyDeviceData:
+    type: object
+    required:
+    - deviceId
+    - value
+    properties:
+      deviceId:
+        type: string
+        example: "2468800108000001"
+        description: デバイスID
+      value:
+        type: array
+        items:
+          $ref: '#/definitions/historyDataValue'
+    description: 履歴要求応答データ（デバイス）
+  historyDataValue:
+    type: object
+    required:
+    - data
+    - time
+    properties:
+      time:
+        type: string
+        example: 2020-06-13 17:56:30
+        description: 時間（YYYY-MM-DD HH:mm:ss）
+      data:
+        type: string
+        description: センサ値
+    description: 履歴要求応答データ詳細
+  nowData:
+    type: object
+    properties:
+      value:
+        type: array
+        items:
+          $ref: '#/definitions/nowDataValue'
+    description: 現在値取得要求応答データ
+  nowDataValue:
+    type: object
+    required:
+    - data
+    - deviceId
+    - sensorId
+    - time
+    properties:
+      deviceId:
+        type: string
+        example: "2468800108000001"
+        description: デバイスID
+      sensorId:
+        type: string
+        example: "0004"
+        description: 0004（温度センサー）, 0005（湿度センサー）, 0007（照度センサー）, 0015（振動センサー）, 0033（電池残量センサー）のいずれかを設定。
+      data:
+        type: string
+        example: "0.1"
+        description: センサー値
+      time:
+        type: string
+        example: 2020-06-13 17:56:30
+        description: 書き込み時刻（YYYY-MM-DD HH:mm:ss）
+    description: 現在値取得要求応答データ詳細
