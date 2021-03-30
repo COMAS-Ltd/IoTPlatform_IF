@@ -235,6 +235,33 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorMessage'
+  /settings/notice:
+    post:
+      tags:
+      - Settings
+      summary: 通知設定
+      description: 通知設定をする
+      parameters:
+      - in: body
+        name: noticeSetting
+        required: true
+        schema:
+          $ref: '#/definitions/noticeSetting'
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorMessage'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errorMessage'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorMessage'
 definitions:
   authUser:
     type: object
@@ -461,8 +488,8 @@ definitions:
       groups:
         type: array
         example:
-        - GR01234556789abcdefghijkABCDEFGHIJK
-        - GR00000000000XXXXXXXXXXXXXXXXXXXXXX
+        - GR01234556789abcdefghijkABCDEFGHIJ
+        - GR00000000000XXXXXXXXXXXXXXXXXXXXX
         description: グループID。複数指定可（一回のアップリンクで指定するデバイスの数が合計100以下になるように設定すること）。devices もしくはgroupsが必須。
         items:
           type: string
@@ -557,3 +584,28 @@ definitions:
         example: 2020-06-13 17:56:30
         description: 書き込み時刻（YYYY-MM-DD HH:mm:ss）
     description: 現在値取得要求応答データ詳細
+  noticeSetting:
+    type: object
+    required:
+    - canNotice
+    - customerId
+    - groupId
+    - userId
+    properties:
+      customerId:
+        type: string
+        example: foo@example.com
+        description: カスタマーID
+      userId:
+        type: string
+        example: userID
+        description: ユーザID
+      groupId:
+        type: string
+        example: GR01234556789abcdefghijkABCDEFGHIJ
+        description: グループID
+      canNotice:
+        type: boolean
+        example: true
+        description: 通知設定
+    description: 通知設定情報
